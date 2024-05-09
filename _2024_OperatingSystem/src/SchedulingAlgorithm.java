@@ -3,20 +3,6 @@ import java.util.ArrayList;
 import java.util.Queue;
 import java.util.LinkedList;
 
-class ReadyQueueElement
-{
-    public int processID;
-    public int burstTime;
-    public int waitingTime;
-
-    public ReadyQueueElement(int processID, int burstTime, int waitingTime)
-    {
-        this.processID = processID;
-        this.burstTime = burstTime;
-        this.waitingTime = waitingTime;
-    }
-}
-
 public class SchedulingAlgorithm
 {
     public static ArrayList<Result> Run(ArrayList<Process> jobList)
