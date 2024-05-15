@@ -31,6 +31,7 @@ public class PriorityScheduling {
     	Process nextJob = jobItr.next();
     	
     	int runTime = 0;
+    	int startTime = 0;
     	int inRunningTime = 0;
     	ReadyQueueElement_Priority currentProcess = null;
     	while(true) {
@@ -57,14 +58,17 @@ public class PriorityScheduling {
     					resultList.add(
         						new Result(
         								currentProcess.processID,
-        								runTime,
+        								startTime,
         								inRunningTime,
         								currentProcess.waitingTime));
-	    				if (currentProcess.remainingTime != 0)
+	    				if (currentProcess.remainingTime != 0) {
+	        				currentProcess.waitingTime = 0;
 	    					readyQueue.add(currentProcess);
+	    				}
     				}
-    				currentProcess = readyQueue.poll();
     				inRunningTime = 0;
+    				startTime = runTime;
+    				currentProcess = readyQueue.poll();
     			}
     			else {
     				int processingTime = 
