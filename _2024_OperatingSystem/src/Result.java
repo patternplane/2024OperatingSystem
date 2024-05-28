@@ -1,3 +1,4 @@
+// Datatype
 
 public class Result
 {

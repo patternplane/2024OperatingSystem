@@ -1,9 +1,10 @@
+// Scheduling Algorithm
 
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.LinkedList;
 
-public class SchedulingAlgorithm
+public class FCFS
 {
     public static ArrayList<Result> Run(ArrayList<Process> jobList)
     {
