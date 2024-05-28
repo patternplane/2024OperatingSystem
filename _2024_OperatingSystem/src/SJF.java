@@ -16,7 +16,7 @@ public class SJF {
         List<ReadyQueueElement> readyQueue = new ArrayList<>();
 
         do {
-            while (!jobList.isEmpty()) {
+            while (jobList.size() != processingIdx) {
                 Process frontJob = jobList.get(processingIdx);
                 if (frontJob.arriveTime == runTime) {
                     readyQueue.add(new ReadyQueueElement(frontJob.processID, frontJob.burstTime, 0));
@@ -53,7 +53,7 @@ public class SJF {
                 readyQueueElement.waitingTime++;
             }
 
-        } while (!jobList.isEmpty() || !readyQueue.isEmpty() || currentProcess != 0);
+        } while (jobList.size() != processingIdx || !readyQueue.isEmpty() || currentProcess != 0);
 
         return resultList;
     }

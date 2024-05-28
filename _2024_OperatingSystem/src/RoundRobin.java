@@ -19,7 +19,7 @@ public class RoundRobin {
         List<ReadyQueueElement> readyQueue = new ArrayList<>();
 
         do {
-            while (jobList.size() != 0) {
+            while (jobList.size() != processingIdx) {
                 Process frontJob = jobList.get(processingIdx);
                 if (frontJob.arriveTime == runTime) {
                     readyQueue.add(new ReadyQueueElement(frontJob.processID, frontJob.burstTime, 0));
@@ -61,7 +61,7 @@ public class RoundRobin {
                 readyQueueElement.waitingTime++;
             }
 
-        } while (jobList.size() != 0 || readyQueue.size() != 0 || currentProcess != 0);
+        } while (jobList.size() != processingIdx || readyQueue.size() != 0 || currentProcess != 0);
 
         return resultList;
     }
