@@ -9,22 +9,39 @@ public class MainClass {
 		
 		ArrayList<Process> p;
 		
-		/*
 		p = new ArrayList<Process>();
-		p.add(new Process(1,0,6,0));
+		
+		/*p.add(new Process(1,0,6,0));
 		p.add(new Process(2,3,3,0));
 		p.add(new Process(3,6,3,0));
-		
+		*/
+		/*
 		p.add(new Process(2,0,10,4));
 		p.add(new Process(1,1,1,5));
 		p.add(new Process(3,2,6,4));
 		p.add(new Process(4,4,11,6));
 		p.add(new Process(5,5,10,1));
-		p.add(new Process(6,7,12,0));
-		*/
+		p.add(new Process(6,7,12,0));*/
 
-		p = randomicProcessGenerator(1, 50);
-		//p = BigProcess(50);
+		//p = intervaledRandomicProcessGenerator(50, 20, 1, 50);
+		//p = intervaledRandomicProcessGenerator(50, 1, 1, 50);
+		//p = intervaledRandomicProcessGenerator(50, 1, 60, 80);
+		//p = intervaledRandomicProcessGenerator(2000, 100, 500, 1000);
+		//p = OrderedBurstProcessGenerator(100, 5, 2,400,true);
+		//p = OrderedPriorityProcessGenerator(100, 5, true);
+
+		JobGenerator j = new JobGenerator();
+		p = j.intervaledRandomicProcessGenerator(10, 50, 100, 500);
+		// 1. 오름차순 burst j.OrderedBurstProcessGenerator(1000, 5, 2, +5);
+		// 2. 내림차순 burst j.OrderedBurstProcessGenerator(1000, 5, 5005, -5);
+		// 3. 오름차순 priority j.OrderedPriorityProcessGenerator(1000, 5, true);
+		// 4. 내림차순 priority j.OrderedPriorityProcessGenerator(1000, 5, false);
+		// 5. 밀도 낮은 arrival j.intervaledRandomicProcessGenerator(1000, 100, 1, 50);
+		// 6. 밀도 높은 arrival j.intervaledRandomicProcessGenerator(1000, 1, 1, 50);
+		// 7. 밀도 중간 arrival j.intervaledRandomicProcessGenerator(1000, 50, 1, 50);
+		// 8. 무거운 burst j.intervaledRandomicProcessGenerator(1000, 50, 100, 500);
+		j.makeToFile(".\\test.txt", p);
+		
 		for (int i = 0; i < p.size(); i++)
 			System.out.println("p.add(new Process(" + p.get(i).processID
 					+ "," + p.get(i).arriveTime
@@ -37,45 +54,11 @@ public class MainClass {
 		printType.add(PrintType.SUMMARY_INFO);
 		//printType.add(PrintType.PROCESS_DETAILED_INFO);
 		
-		printResult(RoundRobin.SchedulingAlgorithm.Run(new ArrayList<Process>(p), new ArrayList<Result>()), p.size(), printType);
-		printResult(SJF.SchedulingAlgorithm.Run(new ArrayList<Process>(p), new ArrayList<Result>()), p.size(), printType);
-		printResult(SchedulingAlgorithm.Run(p), p.size(), printType);
-		printResult(PriorityScheduling.Run(p, true), p.size(), printType);
-		printResult(NewScheduling.Run(p, 6), p.size(), printType);
-	}
-	
-	static ArrayList<Process> BigProcess(int size) {
-		Random r = new Random();
-		
-		ArrayList<Process> jobs = new ArrayList<Process>(size);
-		int arrivalTime = 0;
-		int processID = 1;
-		while (size-- > 0) {
-			jobs.add(new Process(processID++, arrivalTime, r.nextInt(60, 80), r.nextInt(30)));
-			arrivalTime += r.nextInt(20);
-		}
-		
-		return jobs;
-	}
-	
-	static ArrayList<Process> randomicProcessGenerator(int seed, int size) {
-		Random r = new Random();
-		long longSeed = ((long)seed << 32) + seed;  
-		long newSeed = r.nextLong() + longSeed;
-		newSeed ^= r.nextInt();
-		newSeed -= seed;
-		newSeed += r.nextLong();
-		r.setSeed(newSeed);
-		
-		ArrayList<Process> jobs = new ArrayList<Process>(size);
-		int arrivalTime = 0;
-		int processID = 1;
-		while (size-- > 0) {
-			jobs.add(new Process(processID++, arrivalTime, r.nextInt(50) + 1, r.nextInt(30)));
-			arrivalTime += r.nextInt(20);
-		}
-		
-		return jobs;
+		printResult("RoundRobin",RoundRobin.SchedulingAlgorithm.Run(new ArrayList<Process>(p), new ArrayList<Result>()), p.size(), printType);
+		printResult("SJF",SJF.SchedulingAlgorithm.Run(new ArrayList<Process>(p), new ArrayList<Result>()), p.size(), printType);
+		printResult("FCFS",SchedulingAlgorithm.Run(p), p.size(), printType);
+		printResult("Priority",PriorityScheduling.Run(p, true), p.size(), printType);
+		printResult("New",NewScheduling.Run(p, 10), p.size(), printType);
 	}
 
 	enum PrintType {
@@ -84,7 +67,9 @@ public class MainClass {
 		PROCESS_DETAILED_INFO;
 	}
 	
-	static void printResult(ArrayList<Result> result, int itemsCount, EnumSet<PrintType> printType) {
+	static void printResult(String algoName, ArrayList<Result> result, int itemsCount, EnumSet<PrintType> printType) {
+		
+		System.out.println("알고리즘 : " + algoName);
 		
 		if (printType.contains(PrintType.DETAILED_INFO))
 			for (Result r : result)
@@ -109,16 +94,17 @@ public class MainClass {
 		}
 		
 		if (printType.contains(PrintType.SUMMARY_INFO)) {
-			int totalWaitingTime = 0;
-			int totalBurstTime = 0;
+			long totalWaitingTime = 0;
+			long totalBurstTime = 0;
 			for (Result r : result) {
 				totalWaitingTime += r.waitingTime;
 				totalBurstTime += r.burstTime;
 			}
 			
-			System.out.println("전체 실행시간 : " + (result.get(result.size()-1).startP + result.get(result.size()-1).burstTime)
-					+ ", 평균 대기시간 : " + (totalWaitingTime / (double)itemsCount)
-					+ ", 평균 실행시간 : " + ((totalWaitingTime + totalBurstTime) / (double)itemsCount));
+			System.out.printf("전체 실행시간 : %d, 평균 대기시간 : %f, 평균 실행시간 : %f\n"
+					, (result.get(result.size()-1).startP + result.get(result.size()-1).burstTime)
+					, (float)(totalWaitingTime / (double)itemsCount)
+					, ((totalWaitingTime + totalBurstTime) / (double)itemsCount));
 		}
 		System.out.println("======================");
 	}
