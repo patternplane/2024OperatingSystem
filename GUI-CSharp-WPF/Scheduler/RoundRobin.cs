@@ -68,7 +68,7 @@ namespace GUI_CSharp_WPF.Scheduler
                     if (cpuTime == timeSlice)
                     {
                         resultList.Add(new DataType.Result(rq.processID, runTime - cpuTime, cpuTime, rq.waitingTime));
-                        readyQueue.Add(new ReadyQueueElement(rq.processID, cpuDone - cpuTime, rq.waitingTime));
+                        readyQueue.Add(new ReadyQueueElement(rq.processID, cpuDone - cpuTime, 0));
                         rq = readyQueue.ElementAt(0);
                         cpuDone = rq.burstTime;
                         cpuTime = 0;
