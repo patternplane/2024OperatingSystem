@@ -45,8 +45,9 @@ namespace GUI_CSharp_WPF.Scheduler
                 return null;
 
             List<DataType.Result> resultList = new List<DataType.Result>(jobList.Count);
-            
+
             PriorityQueue<ReadyQueueElement_New> readyQueue = new PriorityQueue<ReadyQueueElement_New>();
+            Queue<ReadyQueueElement_New> newQueue = new Queue<ReadyQueueElement_New>();
             IEnumerator<DataType.Process> jobItr = jobList.GetEnumerator();
             jobItr.MoveNext();
             DataType.Process nextJob = jobItr.Current;
@@ -55,11 +56,12 @@ namespace GUI_CSharp_WPF.Scheduler
             int startTime = 0;
             int inRunningTime = 0;
             ReadyQueueElement_New currentProcess = null;
+
             while (true)
             {
                 while (nextJob != null && nextJob.arriveTime <= runTime)
                 {
-                    readyQueue.Push(
+                    newQueue.Enqueue(
                             new ReadyQueueElement_New(
                                     nextJob.processID,
                                     nextJob.burstTime,
@@ -69,40 +71,62 @@ namespace GUI_CSharp_WPF.Scheduler
                 }
                 if (readyQueue.IsEmpty() && currentProcess == null)
                 {
-                    if (nextJob == null)
-                        break;
+                    if (newQueue.Count == 0)
+                    {
+                        if (nextJob == null)
+                            break;
+                        else
+                            runTime = nextJob.arriveTime;
+                    }
                     else
-                        runTime = nextJob.arriveTime;
+                        while (newQueue.Count != 0)
+                            readyQueue.Push(newQueue.Dequeue());
                 }
                 else
                 {
-                    if (currentProcess == null
-                            || currentProcess.remainingTime == 0
-                            || (!readyQueue.IsEmpty() && readyQueue.Peek().CompareTo(currentProcess) < 0))
+                    if (currentProcess != null)
                     {
-                        if (currentProcess != null)
+                        DataType.Result lastResult = (resultList.Count == 0 ? null : resultList.ElementAt(resultList.Count - 1));
+                        if (lastResult != null && lastResult.processID == currentProcess.processID)
                         {
-                            resultList.Add(
-                                    new DataType.Result(
-                                            currentProcess.processID,
-                                            startTime,
-                                            inRunningTime,
-                                            currentProcess.waitingTime));
-                            if (currentProcess.remainingTime != 0)
-                            {
-                                currentProcess.waitingTime = 0;
-                                readyQueue.Push(currentProcess);
-                            }
+                            lastResult.burstTime += inRunningTime;
+                            lastResult.waitingTime += currentProcess.waitingTime;
                         }
-                        inRunningTime = 0;
-                        startTime = runTime;
-                        currentProcess = readyQueue.Poll();
+                        else
+                            resultList.Add(
+                                new DataType.Result(
+                                        currentProcess.processID,
+                                        startTime,
+                                        inRunningTime,
+                                        currentProcess.waitingTime));
+                        if (currentProcess.remainingTime != 0)
+                        {
+                            currentProcess.waitingTime = 0;
+                            newQueue.Enqueue(currentProcess);
+                        }
                     }
-                    else
+                    inRunningTime = 0;
+                    startTime = runTime;
+                    currentProcess = readyQueue.Poll();
+
+                    if (currentProcess != null)
                     {
-                        int processingTime = Math.Min(currentProcess.remainingTime, (currentProcess.remainingTime <= timeQuantum * 2 ? currentProcess.remainingTime : timeQuantum));
+                        int processingTime;
+                        if (readyQueue.IsEmpty() && newQueue.Count == 0)
+                        {
+                            if (nextJob == null)
+                                processingTime = currentProcess.remainingTime;
+                            else
+                                processingTime = Math.Min(currentProcess.remainingTime, nextJob.arriveTime - runTime);
+                        }
+                        else
+                            processingTime = currentProcess.remainingTime <= timeQuantum * 2 ? currentProcess.remainingTime : timeQuantum;
+
                         foreach (ReadyQueueElement_New waitingProcess in readyQueue.GetItems())
                             waitingProcess.waitingTime += processingTime;
+                        foreach (ReadyQueueElement_New waitingProcess in newQueue)
+                            waitingProcess.waitingTime += processingTime;
+
                         currentProcess.remainingTime -= processingTime;
                         runTime += processingTime;
                         inRunningTime += processingTime;
