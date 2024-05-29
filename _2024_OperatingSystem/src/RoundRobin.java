@@ -45,7 +45,7 @@ public class RoundRobin {
                 }
                 if (cpuTime == timeSlice) {
                     resultList.add(new Result(rq.processID, runTime - cpuTime, cpuTime, rq.waitingTime));
-                    readyQueue.add(new ReadyQueueElement(rq.processID, cpuDone - cpuTime, rq.waitingTime));
+                    readyQueue.add(new ReadyQueueElement(rq.processID, cpuDone - cpuTime, 0));
                     rq = readyQueue.get(0);
                     cpuDone = rq.burstTime;
                     cpuTime = 0;

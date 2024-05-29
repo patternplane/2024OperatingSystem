@@ -63,6 +63,8 @@ public class TestSupporter {
 			br.close();
 			f.close();
 			
+			result.sort((a,b)->Integer.compare(a.arriveTime, b.arriveTime));
+			
 			return result;
 		} catch (Exception e) {
 			return null;
