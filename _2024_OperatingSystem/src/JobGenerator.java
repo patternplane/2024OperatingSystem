@@ -53,7 +53,7 @@ public class JobGenerator {
 		return jobs;
 	} 
 	
-	public ArrayList<Process> OrderedBurstProcessGenerator(int size, int interval, int startBurst, int addValue) {
+	public ArrayList<Process> OrderedBurstProcessGenerator(int size, int startBurst, int addValue) {
 		Random r = new Random();
 		
 		ArrayList<Process> jobs = new ArrayList<Process>(size);
@@ -62,7 +62,7 @@ public class JobGenerator {
 		while (size-- > 0 && startBurst > 0) {
 			jobs.add(new Process(processID++, arrivalTime, startBurst, r.nextInt(100)));
 			startBurst += addValue;
-			arrivalTime += r.nextInt(interval);
+			arrivalTime += r.nextInt(startBurst*2);
 		}
 		
 		return jobs;

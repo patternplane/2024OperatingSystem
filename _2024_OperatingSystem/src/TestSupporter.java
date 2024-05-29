@@ -70,9 +70,9 @@ public class TestSupporter {
 	}
 	
 	// Used When Export ResultData To File
-	public void outToFile(ArrayList<Result> result) {
+	public void outToFile(String filePath, ArrayList<Result> result) {
 		try {            
-			FileWriter fw = new FileWriter(new File(".\\output.txt"));            
+			FileWriter fw = new FileWriter(new File(filePath));            
 			BufferedWriter writer = new BufferedWriter(fw);
 			
 			for (Result r : result) {
@@ -91,6 +91,44 @@ public class TestSupporter {
 		} catch (Exception e) {
 			
 		}
+	}
+	
+	public double getAverageWaitingTime(ArrayList<Result> result) {
+		long totalWaitingTime = 0;
+		for (Result r : result)
+			totalWaitingTime += r.waitingTime;
+		return totalWaitingTime / (double)result.size();
+	}
+	
+	public double getSTDEVWaitingTime(ArrayList<Result> result) {
+		double value = 0.0;
+		double avg = getAverageWaitingTime(result);
+		
+		for (Result r : result)
+			value += Math.pow((r.waitingTime-avg), 2);
+		return Math.sqrt(value / result.size()); 
+	}
+	
+	public ArrayList<Result> getPerProcessResult(ArrayList<Result> result) {
+		result = (ArrayList<Result>)result.clone();
+		result.sort((a, b)->Integer.compare(a.processID, b.processID));
+        ArrayList<Result> processResults = new ArrayList<Result>();
+        int pid = -500;
+        for (Result r : result)
+        {
+            if (pid != r.processID)
+            {
+                processResults.add(new Result(r.processID, -1, r.burstTime, r.waitingTime));
+                pid = r.processID;
+            }
+            else
+            {
+                processResults.get(processResults.size() - 1).burstTime += r.burstTime;
+                processResults.get(processResults.size() - 1).waitingTime += r.waitingTime;
+            }
+        }
+        
+        return processResults;
 	}
 	
 	// print results to Console
