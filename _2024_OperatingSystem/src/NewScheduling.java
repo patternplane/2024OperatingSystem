@@ -35,6 +35,7 @@ public class NewScheduling {
     	ArrayList<Result> resultList = new ArrayList<Result>(jobList.size());
     	
     	PriorityQueue<ReadyQueueElement_New> readyQueue = new PriorityQueue<ReadyQueueElement_New>();
+    	Queue<ReadyQueueElement_New> newQueue = new LinkedList<ReadyQueueElement_New>();
     	Iterator<Process> jobItr = jobList.iterator();
     	Process nextJob = jobItr.next();
     	
@@ -42,9 +43,10 @@ public class NewScheduling {
     	int startTime = 0;
     	int inRunningTime = 0;
     	ReadyQueueElement_New currentProcess = null;
+        
     	while(true) {
     		while (nextJob != null && nextJob.arriveTime <= runTime) {
-    			readyQueue.add(
+    			newQueue.add(
     					new ReadyQueueElement_New(
     							nextJob.processID, 
     							nextJob.burstTime,
@@ -53,35 +55,55 @@ public class NewScheduling {
     			nextJob = (jobItr.hasNext() ? jobItr.next() : null);
     		}
     		if (readyQueue.isEmpty() && currentProcess == null) {
-    			if (nextJob == null)
-    				break;
+    			if (newQueue.isEmpty()) {
+	    			if (nextJob == null)
+	    				break;
+	    			else
+	    				runTime = nextJob.arriveTime;
+    			}
     			else
-    				runTime = nextJob.arriveTime;
+    				while (!newQueue.isEmpty())
+    					readyQueue.add(newQueue.remove());
     		}
     		else {
-    			if (currentProcess == null
-    					|| currentProcess.remainingTime == 0
-    					|| (!readyQueue.isEmpty() && readyQueue.peek().compareTo(currentProcess) < 0)) { 
-    				if (currentProcess != null) {
-    					resultList.add(
-        						new Result(
-        								currentProcess.processID,
-        								startTime,
-        								inRunningTime,
-        								currentProcess.waitingTime));
-	    				if (currentProcess.remainingTime != 0) {
-	        				currentProcess.waitingTime = 0;
-	    					readyQueue.add(currentProcess);
-	    				}
+    			if (currentProcess != null) {
+    				Result lastResult = (resultList.isEmpty() ? null : resultList.get(resultList.size() - 1));
+    				if (lastResult != null && lastResult.processID == currentProcess.processID) {
+    					lastResult.burstTime += inRunningTime;
+    					lastResult.waitingTime += currentProcess.waitingTime;
     				}
-    				inRunningTime = 0;
-    				startTime = runTime;
-    				currentProcess = readyQueue.poll();
-    			}
-    			else {
-					int processingTime = Math.min(currentProcess.remainingTime, (currentProcess.remainingTime <= timeQuantum*2 ? currentProcess.remainingTime : timeQuantum));
+    				else
+    					resultList.add(
+    						new Result(
+    								currentProcess.processID,
+    								startTime,
+    								inRunningTime,
+    								currentProcess.waitingTime));
+    				if (currentProcess.remainingTime != 0) {
+        				currentProcess.waitingTime = 0;
+    					newQueue.add(currentProcess);
+    				}
+				}
+				inRunningTime = 0;
+				startTime = runTime;
+				currentProcess = readyQueue.poll();
+				
+    			if (currentProcess != null) {
+					int processingTime;
+					if (readyQueue.isEmpty() && newQueue.isEmpty()) {
+						if (nextJob == null)
+							processingTime = currentProcess.remainingTime;
+						else
+							processingTime = Math.min(currentProcess.remainingTime, nextJob.arriveTime - runTime);
+					}
+					else 
+						processingTime = currentProcess.remainingTime <= timeQuantum*2 ? currentProcess.remainingTime : timeQuantum;
+					
 	    			for (ReadyQueueElement_New waitingProcess : readyQueue)
 	    				waitingProcess.waitingTime += processingTime;
+	    			for (ReadyQueueElement_New waitingProcess : newQueue)
+	    				waitingProcess.waitingTime += processingTime;
+	    			
 	    			currentProcess.remainingTime -= processingTime;
 	    			runTime += processingTime;
 	    			inRunningTime += processingTime;

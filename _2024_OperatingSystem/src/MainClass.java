@@ -130,6 +130,8 @@ public class MainClass {
 		printType.add(PrintType.SUMMARY_INFO); // can toggle : Show Summay Information
 		printType.add(PrintType.PROCESS_DETAILED_INFO); // can toggle : Show Result per Process
         
+		p.sort((p1, p2) -> Integer.compare(p1.arriveTime, p2.arriveTime));
+		
 		printResult(p.size(), printType, "RoundRobin", RoundRobin.Run(p, timeSlice));
 		printResult(p.size(), printType, "SJF", SJF.Run(p));
 		printResult(p.size(), printType, "FCFS", FCFS.Run(p));
