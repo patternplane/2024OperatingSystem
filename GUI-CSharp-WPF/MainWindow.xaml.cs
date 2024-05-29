@@ -36,7 +36,11 @@ namespace GUI_CSharp_WPF
         AlgorithmType currentType = AlgorithmType.FCFS;
         public string SubInfoText { get { return SubInfoSelector(currentType); } }
         public string ParameterText { get; set; }
-        public string AverageResultText { get; set; }
+        public string AverageResultText { get; set; } =
+                    "총 작업시간 : "
+                    + "     CPU 사용시간 : "
+                    + "     평균 대기시간 : "
+                    + "     평균 처리시간 : ";
         public ObservableCollection<DataType.Process> InputJobs { get; } = new ObservableCollection<DataType.Process>();
         public ObservableCollection<DataType.Result> ResultTable { get; } = new ObservableCollection<DataType.Result>();
         public ObservableCollection<DataType.Result> ProcessResultTable { get; } = new ObservableCollection<DataType.Result>(); 
@@ -127,11 +131,16 @@ namespace GUI_CSharp_WPF
                 InputJobs.Clear();
                 ResultTable.Clear();
                 ProcessResultTable.Clear();
+                AverageResultText = 
+                    "총 작업시간 : " 
+                    + "     CPU 사용시간 : "
+                    + "     평균 대기시간 : "
+                    + "     평균 처리시간 : ";
+                NotifyPropertyChanged("AverageResultText"); ;
+                dr.Clear();
 
                 foreach (DataType.Process p in fileReader.readFile(fd.FileName))
                     InputJobs.Add(p);
-
-                NotifyPropertyChanged("InputJobs");
             }
         }
 

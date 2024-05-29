@@ -45,6 +45,11 @@ namespace GUI_CSharp_WPF
                     new Size(width, 60)));
         }
 
+        public void Clear()
+        {
+            _children.Clear();
+        }
+
         public double DrawGanttChart(List<DataType.Result> results)
         {
             _children.Clear();
