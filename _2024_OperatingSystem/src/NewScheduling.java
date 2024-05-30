@@ -94,7 +94,7 @@ public class NewScheduling {
 						if (nextJob == null)
 							processingTime = currentProcess.remainingTime;
 						else
-							processingTime = Math.min(currentProcess.remainingTime, nextJob.arriveTime - runTime);
+                            processingTime = Math.min(currentProcess.remainingTime, currentProcess.remainingTime <= timeQuantum * 2 ? currentProcess.remainingTime : timeQuantum);
 					}
 					else 
 						processingTime = currentProcess.remainingTime <= timeQuantum*2 ? currentProcess.remainingTime : timeQuantum;
