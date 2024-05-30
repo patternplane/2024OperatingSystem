@@ -117,7 +117,7 @@ namespace GUI_CSharp_WPF.Scheduler
                             if (nextJob == null)
                                 processingTime = currentProcess.remainingTime;
                             else
-                                processingTime = Math.Min(currentProcess.remainingTime, nextJob.arriveTime - runTime);
+                                processingTime = Math.Min(currentProcess.remainingTime, currentProcess.remainingTime <= timeQuantum * 2 ? currentProcess.remainingTime : timeQuantum);
                         }
                         else
                             processingTime = currentProcess.remainingTime <= timeQuantum * 2 ? currentProcess.remainingTime : timeQuantum;
