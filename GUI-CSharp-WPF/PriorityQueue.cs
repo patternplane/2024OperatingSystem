@@ -34,7 +34,7 @@ namespace GUI_CSharp_WPF
             if (n == 0)
                 throw new Exception("PriorityQueue Empty");
 
-            return dataArray[n];
+            return dataArray[1];
         }
 
         public T Poll()
